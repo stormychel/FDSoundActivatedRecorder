@@ -115,14 +115,22 @@ open class FDSoundActivatedRecorder: NSObject, AVAudioRecorderDelegate {
             AVLinearPCMIsFloatKey : 0,
             AVEncoderAudioQualityKey : Int.max
         ]
-        //FIXME: do not use ! here
-        let audioRecorder = try! AVAudioRecorder(url: self.recordedFileURL, settings: recordSettings)
-        audioRecorder.delegate = self
-        audioRecorder.isMeteringEnabled = true
-        if !audioRecorder.prepareToRecord() {
-            // FDSoundActivateRecorder can't prepare recorder
+        
+        do {
+            if let audioRecorder = try? AVAudioRecorder(url: self.recordedFileURL, settings: recordSettings) {
+                                
+//                audioRecorder.delegate = self // causes objc[97783]: Cannot form weak reference to instance (0x6000022500e0) of class FDSoundActivatedRecorder.FDSoundActivatedRecorder. It is possible that this object was over-released, or is in the process of deallocation - TODO: do we need this?
+                
+                audioRecorder.isMeteringEnabled = true
+                if !audioRecorder.prepareToRecord() {
+                    // FDSoundActivateRecorder can't prepare recorder
+                }
+                return audioRecorder
+            }
+            
         }
-        return audioRecorder
+        
+        return AVAudioRecorder() // TODO: check whether this is aenough
     }()
     
     fileprivate(set) var status = FDSoundActivatedRecorderStatus.inactive
